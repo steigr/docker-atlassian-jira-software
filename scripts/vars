@@ -1,0 +1,43 @@
+#!sh
+
+# System specific
+
+export TIMEZONE="${TIMEZONE:-UTC}"
+
+# Atlassian Crowd
+export JIRA_HOME="${JIRA_HOME:-/software}"
+export SERVER_ID="${SERVER_ID}"
+
+# Automatic Setup
+export AUTO_SETUP="${AUTO_SETUP:-true}"
+
+# Tomcat
+export CATALINA_HOME="${CATALINA_HOME:-/app}"
+export CATALINA_TMPDIR="${CATALINA_TMPDIR:-/tmp}"
+
+# Single-Sign-On (Crowd SSO)
+
+## Path to properties-files
+export CROWD_SSO_PROPERTIES_SOFTWARE="${CROWD_SSO_PROPERTIES_SOFTWARE:-$JIRA_HOME/crowd.properties}"
+export CROWD_SSO_SERAPH_SOFTWARE="${CROWD_SSO_SERAPH_SOFTWARE:-$CATALINA_HOME/atlassian-jira/WEB-INF/classes/seraph-config.xml}"
+
+# Available Authenticators
+# - name: com.atlassian.jira.security.login.JiraSeraphAuthenticator
+#   description: Jira Internal Authenticator
+# - name: com.atlassian.jira.security.login.SSOSeraphAuthenticator
+#   description: Crowd SSO Authenticator
+# - name: eu.midan.MIDANAuthenticator
+#   description: Crowd SSO and Jira Internal Authenticator as fallback option ( e.g. JIRA Servicedesk Customers )
+export CROWD_SSO_SERAPH_CLASS="${CROWD_SSO_SERAPH_CLASS:-com.atlassian.jira.security.login.JiraSeraphAuthenticator}"
+
+# crowd sso
+export CROWD_SSO_APP_SOFTWARE_SESSION_LASTVALIDATION="${CROWD_SSO_APP_SOFTWARE_SESSION_LASTVALIDATION:-session.lastvalidation}"
+export CROWD_SSO_APP_SOFTWARE_SESSION_TOKENKEY="${CROWD_SSO_APP_SOFTWARE_SESSION_LASTVALIDATION:-session.tokenkey}"
+export CROWD_SSO_APP_SOFTWARE_CROWD_SERVER_URL="${CROWD_SSO_APP_SOFTWARE_CROWD_SERVER_URL:-http://localhost:8095/crowd/services/}"
+export CROWD_SSO_APP_SOFTWARE_APPLICATION_NAME="${CROWD_SSO_APP_SOFTWARE_APPLICATION_NAME:-crowd}"
+export CROWD_SSO_APP_SOFTWARE_HTTP_TIMEOUT="${CROWD_SSO_APP_SOFTWARE_HTTP_TIMEOUT:-30000}"
+export CROWD_SSO_APP_SOFTWARE_SESSION_ISAUTHENTICATED="${CROWD_SSO_APP_SOFTWARE_SESSION_ISAUTHENTICATED:-session.isauthenticated}"
+export CROWD_SSO_APP_SOFTWARE_APPLICATION_LOGIN_URL="${CROWD_SSO_APP_SOFTWARE_APPLICATION_LOGIN_URL:-http://localhost:8095/crowd}"
+export CROWD_SSO_APP_SOFTWARE_APPLICATION_BASE_URL="${CROWD_SSO_APP_SOFTWARE_APPLICATION_BASE_URL:-http://localhost:8095/crowd}"
+export CROWD_SSO_APP_SOFTWARE_SESSION_VALIDATIONINTERVAL="${CROWD_SSO_APP_SOFTWARE_SESSION_VALIDATIONINTERVAL:-0}"
+export CROWD_SSO_APP_SOFTWARE_APPLICATION_PASSWORD="${CROWD_SSO_APP_SOFTWARE_APPLICATION_PASSWORD:-password}"

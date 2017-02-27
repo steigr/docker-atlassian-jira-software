@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+
+jira_setup_log() {
+	printf '\e[1mAutomatic Setup\e[0m \e[32m%s\e[0m\n' "$*"
+}
+
+jira_setup_fail() {
+	jira_setup_log "$@"; return 1
+}
+
+# setup_make_cookie() {
+# 	local base_url="$1"
+# 	[[ -f "setup-cookie.jar" ]] \
+# 	|| curl -s -o /dev/null -L -c "setup-cookie.jar" "$base_url"
+# }
+
+# setup_jira_next_step() {
+# 	local url="$1"
+# 	setup_make_cookie "$url"
+# 	curl -b "setup-cookie.jar" -s -f -o /dev/null \
+# 		"$url" -w "%{redirect_url}" \
+# 	| xargs -n1 basename \
+# 	| cut -f1 -d\!
+# }
+
+# setup_jira_SetupApplicationProperties() {
+# 	local base_url="$1" atl_token
+# 	setup_make_cookie "$base_url"
+# 	atl_token="$(curl -s "$base_url/secure/SetupApplicationProperties.jspa" | xml fo --html 2>/dev/null | xml sel -t -v '//input[@name="atl_token"]/@value')"
+# 	curl -b "setup-cookie.jar" -s -f -o /dev/null \
+# 		"$base_url/secure/SetupApplicationProperties.jspa" \
+# 		-d title=Servicedesk \
+# 		-d mode=private \
+# 		-d baseURL="$base_url" \
+# 		-d nextStep=true \
+# 		-d atl_token="$atl_token" \
+# 		-w "%{redirect_url}" \
+# 	| xargs -n1 basename \
+# 	| cut -f1 -d\!
+# }
+
+# setup_jira_SetupDatabase() {
+# 	local base_url="$1"
+# 	setup_make_cookie "$base_url"
+# 	curl -b "setup-cookie.jar" -s -f -o /dev/null \
+# 		"$base_url/secure/SetupDatabase.jspa" \
+# 		-d databaseOption=external \
+# 		-d databaseType=postgres72 \
+# 		-d jdbcHostname=172.17.0.2 \
+# 		-d jdbcPort=5432 \
+# 		-d jdbcDatabase=servicedesk_production \
+# 		-d jdbcSid= \
+# 		-d jdbcUsername=postgres \
+# 		-d jdbcPassword=supersecure \
+# 		-d schemaName=public \
+# 		-d testingConnection=false
+# 	setup_jira_next_step "$base_url/secure/SetupDatabase.jspa"
+# }
+
+# setup_jira_SetupLicense() {
+# 	local base_url="$1"
+# 	setup_make_cookie "$base_url"
+# 	curl -b "setup-cookie.jar" -s -f -o /dev/null \
+# 		"$base_url/secure/SetupLicense\!validateLicense.jspa" \
+# 		-d licenseToValidate="$LICENSE"
+# 	curl -b "setup-cookie.jar" -s -f -o /dev/null \
+# 		"$base_url/secure/SetupLicense.jspa" \
+# 		-d setupLicenseKey="$LICENSE"
+# }
+
+# setup_jira_SetupMode() {
+# 	local base_url="$1"
+# 	setup_make_cookie "$base_url"
+# 	curl -L -b "setup-cookie.jar" "$base_url/secure/SetupMode"'!changeLanguage.jspa' \
+# 		-s -f -o /dev/null \
+# 		-d jiraLanguage=de_DE 
+# 	curl -b "setup-cookie.jar" "$base_url/secure/SetupMode.jspa" \
+# 		-s -f -o /dev/null \
+# 		-d setupOption=classic
+# 	setup_jira_next_step "$base_url/secure/SetupMode.jspa"
+# }
+
+main() {
+	true
+	# local base_url
+	# exit 0
+ #  exec >/proc/1/fd/1 2>/proc/1/fd/2
+	# apk add --no-cache curl
+	# base_url="http://localhost:8080"
+ #  set -eo pipefail
+ #  [[ -z "$TRACE" ]] || set -x
+ #  sleep 10
+ #  action="$(setup_jira_next_step "$base_url")"
+ #  while true; do    
+ #  	command -v "setup_jira_$action" \
+ #  	&& action="$("setup_jira_$action" "$base_url")" \
+ #  	|| jira_setup_fail "Unknown Step $action"
+ #   done
+}
+
+create_jira_home() {
+  [[ -d "$JIRA_HOME" ]] || install -D -d -m 0750 -o "$APPLICATION_USER" -g "$APPLICATION_USER" "$JIRA_HOME"
+  chown -R "$APPLICATION_USER" "$JIRA_HOME"
+}
+
+create_jira_config() { true; }
+
+fix_permissions() {
+	chown "$APPLICATION_USER" "$CATALINA_HOME/work" "$CATALINA_HOME/logs" "/app/.oracle_jre_usage"
+	chmod 1777 /tmp
+}
+
+setup_step() {
+	[[ -f "$JIRA_HOME/dbconfig.xml" ]] || echo "SetupMode"
+}
+
+create_jira_autoconfigure() {
+  [[ "$SERVER_ID" ]] || return 0
+  [[ "$LICENSE"   ]] || return 0
+  [[ "$(setup_step)" = "SetupMode" ]] || return 0
+  [[ "$AUTO_SETUP" = "true" ]] || return 0
+  jira_setup_log Begin
+  apk add --no-cache openrc
+  start-stop-daemon -S -x "$(realpath "$PWD/${bashSH_SOURCE[0]}")" -b
+  apk add --no-cache openrc
+}
+
+if [[ "${BASH_SOURCE[0]}" = "$0" ]]; then
+  main "$@"
+else
+  fix_permissions
+  create_jira_home
+  create_jira_config
+  # create_jira_autoconfigure
+
+  set -- JAVA_OPTS="$JAVA_OPTS -Djira.home=$JIRA_HOME" "$@"
+fi
