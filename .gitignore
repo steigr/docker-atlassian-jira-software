@@ -1,1 +1,2 @@
-/software.env
+*.env
+Dockerfile.build
